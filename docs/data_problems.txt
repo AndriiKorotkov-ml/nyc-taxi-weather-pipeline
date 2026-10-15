@@ -1,0 +1,3 @@
+1.NULL Values : RatecodeID ,store_and_fwd_flag, congestion_surcharge, cbd_congestion_fee,passenger_count
+2. tpep_pickup_datetime - date is out of range
+3. total amount and other columns < 0

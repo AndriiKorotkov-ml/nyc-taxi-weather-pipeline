@@ -1,0 +1,24 @@
+[project]
+name = "end-to-end-walmart-pipeline"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Andrii", email = "werty000.vvv@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.43.113",
+    "dotenv>=0.9.9",
+    "pandas>=3.0.6",
+    "pyarrow>=26.0.0",
+    "pyspark>=4.2.0",
+    "requests>=2.34.2",
+]
+
+[project.scripts]
+end-to-end-walmart-pipeline = "end_to_end_walmart_pipeline:main"
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"
