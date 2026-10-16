@@ -1,0 +1,1 @@
+CREATE SCHEMA IF NOT EXISTS nyc_taxi_weather_project.bronze;
