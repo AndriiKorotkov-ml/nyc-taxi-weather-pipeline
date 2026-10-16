@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS nyc_taxi_weather_project.bronze.taxi_yellow;
 ALTER TABLE nyc_taxi_weather_project.bronze.taxi_yellow SET TBLPROPERTIES ('delta.feature.timestampNtz' = 'supported');
 
-COPY INTO taxi_yellow 
+COPY INTO nyc_taxi_weather_project.bronze.taxi_yellow
 FROM (
     SELECT *,
     _metadata.file_path AS _source_file,

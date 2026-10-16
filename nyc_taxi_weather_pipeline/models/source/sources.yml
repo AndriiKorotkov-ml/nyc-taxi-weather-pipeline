@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+    - name: bronze
+      description: "Raw data, loaded from S3 through COPY INTO"
+      database: nyc_taxi_weather_project
+      schema: bronze
+      tables:
+        - name: taxi_yellow
+          description: "NYC Yellow Taxi trips"
+          columns:
+          - name: tpep_pickup_datetime
+            data_tests:
+              - not_null
+        - name: weather_conditions
+          description: "Weather conditions raw"
+          columns:
+          - name: hourly
+            data_tests:
+              - not_null

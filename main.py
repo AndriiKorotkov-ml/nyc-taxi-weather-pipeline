@@ -99,7 +99,8 @@ def main(
 
         print(f"Taxi uploaded: {taxi_uri}")
         print(f"Weather uploaded: {weather_uri}")
-
+        print(f"Taxi s3 key: {taxi_key}")
+        print(f"weather s3 key: {weather_key}")
     print("Ingestion completed")
 
 

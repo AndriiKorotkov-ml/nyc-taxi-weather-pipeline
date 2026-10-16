@@ -1,6 +1,8 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
+
 load_dotenv()
 TAXI_URL_TEMPLATE = (
     "https://d37ci6vzurychx.cloudfront.net/trip-data/"

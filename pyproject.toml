@@ -9,6 +9,8 @@ authors = [
 requires-python = ">=3.12"
 dependencies = [
     "boto3>=1.43.113",
+    "dbt-core>=1.12.5",
+    "dbt-databricks>=1.12.7",
     "dotenv>=0.9.9",
     "pandas>=3.0.6",
     "pyarrow>=26.0.0",
