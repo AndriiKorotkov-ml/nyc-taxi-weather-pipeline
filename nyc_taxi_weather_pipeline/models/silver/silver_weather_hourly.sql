@@ -1,5 +1,9 @@
+{{ config(
+    materialized='table',
+    tblproperties={'delta.feature.timestampNtz': 'supported'}
+) }}
 SELECT 
-    to_timestamp(r.time) as weather_hour,
+    to_timestamp_ntz(r.time) as weather_hour,
     r.temperature_2m as temperature,
     r.precipitation,
     r.weather_code

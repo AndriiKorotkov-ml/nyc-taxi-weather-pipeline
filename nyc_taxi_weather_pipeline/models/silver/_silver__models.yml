@@ -22,4 +22,45 @@ models:
           - accepted_values:
                 arguments:
                   values: [0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67,71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 97, 99]
-
+  - name: silver_yellow_trips
+    description: "Cleaned yellow taxi trip.Grain = one trip."
+    columns:
+      - name: pickup_datetime
+        description: "Час початку поїздки. Визначає місяць у фільтрі."
+        tests:
+          - not_null
+      - name: dropoff_datetime
+        tests:
+          - not_null
+      - name: pu_location_id
+        tests:
+          - not_null
+      - name: do_location_id
+        tests:
+          - not_null
+      - name: trip_distance
+        tests:
+          - not_null
+      - name: total_amount
+        tests:
+          - not_null
+      - name: payment_type
+        description: "0 = Flex Fare, 1 = Credit card, 2 = Cash, 3 = No charge, 4 = Dispute, 5 = Unknown, 6 = Voided."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1, 2, 3, 4, 5, 6]
+      - name: trip_type
+        tests:
+          - accepted_values:
+              values: ['flex_fare', 'standard']
+      - name: amount_status
+        tests:
+          - accepted_values:
+              values: ['positive', 'negative', 'zero', 'missing']
+      - name: passenger_count
+        description: "NULL для Flex Fare (payment_type = 0)."
+        tests:
+          - not_null:
+              config:
+                where: "trip_type = 'standard'"
