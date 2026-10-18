@@ -26,7 +26,6 @@ models:
     description: "Cleaned yellow taxi trip.Grain = one trip."
     columns:
       - name: pickup_datetime
-        description: "Час початку поїздки. Визначає місяць у фільтрі."
         tests:
           - not_null
       - name: dropoff_datetime
@@ -59,7 +58,7 @@ models:
           - accepted_values:
               values: ['positive', 'negative', 'zero', 'missing']
       - name: passenger_count
-        description: "NULL для Flex Fare (payment_type = 0)."
+        description: "NULL for Flex Fare (payment_type = 0)."
         tests:
           - not_null:
               config:
