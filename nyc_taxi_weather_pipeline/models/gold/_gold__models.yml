@@ -1,0 +1,66 @@
+version: 2
+models:
+  - name: gold_obt_taxi_weather
+    description: "One Big Table for yellow taxi and weather hourly"
+    config:
+      materialized: table
+      schema: gold
+    columns:
+      - name: vendor_id
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1,2,6,7]
+      - name: trip_duration_minutes
+        data_tests:
+          - not_null
+          - generic_non_negative
+      - name: passenger_count
+        data_tests: 
+          - generic_non_negative
+      - name: do_location_id
+        data_tests:
+          - not_null
+      - name: pu_location_id
+        data_tests:
+          - not_null
+      - name: payment_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0,1,2,3,4]
+      - name: trip_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['standard','flex_fare']
+      - name: amount_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['positive','negative','zero','missing']
+      - name: is_revenue_trip
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true,false]
+      - name: temperature
+        data_tests:
+          - not_null
+      - name: precipitation
+        data_tests:
+          - generic_non_negative
+          - not_null
+      - name: weather_code
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67,
+                 71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96,97, 99]
+
