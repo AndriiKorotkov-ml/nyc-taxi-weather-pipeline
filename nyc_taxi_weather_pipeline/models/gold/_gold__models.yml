@@ -63,4 +63,133 @@ models:
               arguments:
                 values: [0, 1, 2, 3, 45, 48, 51, 53, 55, 56, 57, 61, 63, 65, 66, 67,
                  71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96,97, 99]
+  - name: gold_fact_yellow_taxi_trips
+    config:
+      schema: gold
+    columns:
+      - name: trip_id
+        data_tests:
+          - not_null
+          - unique
+      - name: vendor_id
+        data_tests:
+          - relationships:
+              arguments: 
+                to: ref('gold_dim_vendor')
+                field: vendor_id
+      - name: weather_code
+        data_tests:
+          - relationships:
+              arguments: 
+                to: ref('gold_dim_weather_code') 
+                field: weather_code
+      - name: pu_location_id
+        data_tests:
+          - relationships:
+              arguments: 
+                to: ref('gold_dim_taxi_zone_lookup')
+                field: location_id
+      - name: do_location_id
+        data_tests:
+          - relationships:
+              arguments: 
+                to: ref('gold_dim_taxi_zone_lookup')
+                field: location_id
+      - name: pickup_date
+        data_tests:
+          - relationships:
+              arguments: 
+                to: ref('gold_dim_calendar')
+                field: date_id
+      - name: payment_type
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('gold_dim_payment_type')
+                field: payment_type
+  
+  - name: gold_dim_calendar
+    config:
+      schema: gold
+    columns:
+      - name: date_id
+        data_tests:
+          - not_null
+          - unique
+      - name: year
+        data_tests:
+          - not_null
+      - name: month
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+                max_value: 12
+      - name: day
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+                max_value: 31
+  - name: gold_dim_vendor
+    config:
+      schema: gold
+    columns:
+      - name: vendor_id
+        data_tests:
+          - not_null 
+          - unique
+          - accepted_values:
+              arguments: 
+                values: [1,2,6,7]
+      - name: vendor_name
+        data_tests:
+          - not_null
+  - name: gold_weather_code
+    config:
+      schema: gold
+    columns:
+      - name: weather_code
+        data_tests: 
+          - not_null
+          - unique
+      - name: weather_description
+        data_tests:
+          - not_null
+      - name: weather_group
+        data_tests:
+          - not_null    
+  - name: gold_dim_payment_type
+    config: 
+      schema: gold
+    columns:
+      - name: payment_type
+        data_tests:
+          - not_null
+          - unique
+      - name: payment_name
+        data_tests:
+          - not_null
+  - name: gold_dim_taxi_zone_lookup
+    config:
+      schema: gold
+    columns:
+      - name: location_id
+        data_tests:
+          - not_null
+          - unique
+      - name: borough
+        data_tests:
+          - not_null
+      - name: zone
+        data_tests:
+          - not_null
+      - name: service_zone
+        data_tests:
+          - not_null
+       
+
+
+
+
 
