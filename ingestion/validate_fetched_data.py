@@ -39,10 +39,10 @@ def validate_json_weather_file(file_path:Path,required_variables:tuple[str,...],
         raise ValueError("Wrong period of time")
     return num_records
 
-def validate_taxi_file(file_path:Path,required_columns:set[str]) -> int:
+def validate_taxi_file(file_path:str,required_columns:set[str]) -> int:
     if not file_path.is_file():
         raise FileNotFoundError(f"File was not found: {file_path}")
-    if file_path.stat().st_size() == 0:
+    if file_path.stat().st_size == 0:
         raise ValueError(f"The file is empty: {file_path}")
     parquet_file = pq.ParquetFile(file_path)
     num_rows = parquet_file.metadata.num_rows

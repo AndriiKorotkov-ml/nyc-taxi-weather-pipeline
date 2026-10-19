@@ -6,7 +6,7 @@ FROM (
     SELECT *,
     _metadata.file_path AS _source_file,
     current_timestamp() AS _ingested_at
-    FROM "s3://andrii-nyc-taxi-weather-lake/bronze/taxi/yellow/")
+    FROM <BUCKET>)
 FILEFORMAT = PARQUET
 PATTERN = '*/*/*.parquet'
 COPY_OPTIONS ('mergeSchema' = 'true')

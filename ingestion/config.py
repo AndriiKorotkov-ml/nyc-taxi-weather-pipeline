@@ -20,16 +20,18 @@ WEATHER_HOURLY_VARIABLES = (
     "precipitation",
     "weather_code",
 )
-
-YELLOW_TAXI_LOCAL_PATH_TEMPLATE =Path("data/raw/taxi/yellow") / "yellow_tripdata_{year}-{month:02d}.parquet"
+DATA_DIR = Path(os.getenv("DATA_DIR", "data"))
+YELLOW_TAXI_LOCAL_PATH_TEMPLATE = DATA_DIR / "raw/taxi/yellow" / "yellow_tripdata_{year}-{month:02d}.parquet"
+WEATHER_LOCAL_PATH = DATA_DIR / "raw/weather/nyc"
 YELLOW_TAXI_S3_FILE_PATH_TEMPLATE = ("bronze/taxi/yellow/year={year}/month={month:02d}/yellow_tripdata_{year}-{month:02d}.parquet")
-WEATHER_LOCAL_PATH = Path("data/raw/weather/nyc")
 WEATHER_S3_FILE_PATH_TEMPLATE = (
     "bronze/weather/location=nyc/"
     "start_date={start_date}/end_date={end_date}/"
     "response.json")
 
-S3_BUCKET=os.getenv("S3_BUCKET")
+S3_BUCKET = os.getenv("S3_BUCKET")
+if not S3_BUCKET:
+    raise RuntimeError("S3_BUCKET is not set in .env")
 
 REQUIRED_TAXI_COLUMNS = {
     "tpep_pickup_datetime",

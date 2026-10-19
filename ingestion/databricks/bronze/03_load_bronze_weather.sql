@@ -5,7 +5,7 @@ FROM (
     SELECT *,
     _metadata.file_path as _source_file,
     current_timestamp() as _ingested_at
-    FROM "s3://andrii-nyc-taxi-weather-lake/bronze/weather/"
+    FROM <BUCKET>
 )
 FILEFORMAT = JSON
 PATTERN = "*/*/*/*.json"
