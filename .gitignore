@@ -14,7 +14,6 @@ data/
 
 *.parquet
 logs/
-dbt_project.yml
 .vscode/
 .DS_Store
 target/
