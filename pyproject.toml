@@ -1,5 +1,5 @@
 [project]
-name = "end-to-end-walmart-pipeline"
+name = "end-to-end-nyc-taxi-weather-pipeline"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [project.scripts]
-end-to-end-walmart-pipeline = "end_to_end_walmart_pipeline:main"
+end-to-end-walmart-pipeline = "end_to_end_nyc_taxi_weather_pipeline:main"
 
 [build-system]
 requires = ["uv_build>=0.12.17,<0.13.0"]
