@@ -42,11 +42,11 @@ models:
 seeds:
   nyc_taxi_weather_pipeline:
     +schema: gold
-  taxi_zone_lookup:
-  +column_types:
-    borough: string
-    zone: string
-    servive_zone: string
+    taxi_zone_lookup:
+      +column_types:
+        borough: string
+        zone: string
+        servive_zone: string
   
 
     

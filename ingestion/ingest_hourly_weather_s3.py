@@ -42,5 +42,5 @@ def fetch_to_local_weather(url:str,params:dict,dest_path:Path) -> None:
 
 def upload_weather_json_to_s3(bucket:str,filename:Path,s3_key:str) -> str:
      s3_client = boto3.client("s3")
-     s3_client.upload_file(Filename=filename,Bucket=bucket,Key=s3_key)
+     s3_client.upload_file(Filename=str(filename),Bucket=bucket,Key=s3_key)
      return f"s3://{bucket}/{s3_key}"

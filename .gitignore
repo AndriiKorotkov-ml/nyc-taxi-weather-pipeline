@@ -18,3 +18,4 @@ logs/
 .DS_Store
 target/
 test/
+/airflow/config/airflow.cfg

@@ -1,0 +1,6 @@
+apache-airflow-providers-databricks
+apache-airflow-providers-amazon
+boto3
+requests
+pyarrow
+python-dotenv
