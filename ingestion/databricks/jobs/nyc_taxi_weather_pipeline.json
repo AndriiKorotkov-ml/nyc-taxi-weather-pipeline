@@ -1,0 +1,98 @@
+resources:
+  jobs:
+    nyc_weather_taxi_pipeline:
+      name: nyc_weather_taxi_pipeline
+      description: |
+        «Monthly NYC taxi + weather pipeline: bronze, dbt silver and gold».
+      email_notifications:
+        on_failure:
+          - <email>
+        on_duration_warning_threshold_exceeded:
+          - <email>
+      timeout_seconds: 3600
+      health:
+        rules:
+          - metric: RUN_DURATION_SECONDS
+            op: GREATER_THAN
+            value: 1800
+      tasks:
+        - task_key: create_bronze_schema
+          sql_task:
+            query:
+              query_id: 08a0d684-fe39-4ccb-bcae-02d587fc255d
+            warehouse_id: f73e49934deb96da
+        - task_key: create_bronze_weather
+          depends_on:
+            - task_key: create_bronze_schema
+          sql_task:
+            query:
+              query_id: f1e36f0d-102d-4d2a-9b9d-bbc80b11c71a
+            warehouse_id: f73e49934deb96da
+        - task_key: create_bronze_yellow_taxi
+          depends_on:
+            - task_key: create_bronze_schema
+          sql_task:
+            query:
+              query_id: 557f9287-6b7b-4d87-9102-3e1647c40bc4
+            warehouse_id: f73e49934deb96da
+        - task_key: dbt_create_silver_layer
+          depends_on:
+            - task_key: create_bronze_schema
+            - task_key: create_bronze_weather
+            - task_key: create_bronze_yellow_taxi
+          dbt_task:
+            project_directory: nyc_taxi_weather_pipeline
+            commands:
+              - dbt deps
+              - dbt seed
+              - dbt run
+              - dbt test
+            schema: silver
+            warehouse_id: f73e49934deb96da
+            catalog: nyc_taxi_weather_project
+            source: GIT
+          max_retries: 1
+          min_retry_interval_millis: 60000
+          retry_on_timeout: true
+          disable_auto_optimization: true
+          email_notifications:
+            on_failure:
+              - <email>
+          environment_key: dbt-default
+        - task_key: dbt_create_gold_layer
+          depends_on:
+            - task_key: dbt_create_silver_layer
+          dbt_task:
+            project_directory: nyc_taxi_weather_pipeline
+            commands:
+              - dbt deps
+              - dbt seed
+              - dbt run
+              - dbt test
+            schema: gold
+            warehouse_id: f73e49934deb96da
+            catalog: nyc_taxi_weather_project
+            source: GIT
+          max_retries: 1
+          min_retry_interval_millis: 60000
+          retry_on_timeout: true
+          disable_auto_optimization: true
+          environment_key: dbt-default
+      git_source:
+        git_url: https://github.com/AndriiKorotkov-ml/nyc-taxi-weather-pipeline
+        git_provider: gitHub
+        git_branch: main
+      queue:
+        enabled: true
+      parameters:
+        - name: year
+          default: "2026"
+        - name: month
+          default: "03"
+      environments:
+        - environment_key: dbt-default
+          spec:
+            dependencies:
+              - dbt-databricks>=1.0.0,<2.0.0
+            environment_version: "6"
+      performance_target: PERFORMANCE_OPTIMIZED
