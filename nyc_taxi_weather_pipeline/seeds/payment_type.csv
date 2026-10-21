@@ -4,3 +4,4 @@ payment_type,payment_name
 2,Cash
 3,No charge
 4,Dispute
+5,Unknown
