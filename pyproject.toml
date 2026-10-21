@@ -1,7 +1,7 @@
 [project]
 name = "end-to-end-nyc-taxi-weather-pipeline"
 version = "0.1.0"
-description = "Add your description here"
+description = "Monthly NYC yellow taxi and weather data pipeline using AWS S3, Airflow, Databricks, and dbt."
 readme = "README.md"
 authors = [
     { name = "Andrii" }
