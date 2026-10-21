@@ -9,6 +9,7 @@ from airflow.providers.databricks.operators.databricks import (
     DatabricksRunNowOperator,
 )
 from airflow.sdk import Param, dag, get_current_context, task
+from airflow.timetables.trigger import CronTriggerTimetable
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,9 @@ logger = logging.getLogger(__name__)
     dag_id="nyc_taxi_weather_ingestion_dag",
     description="Ingest monthly NYC taxi and weather data into S3",
     start_date=datetime(2024, 1, 1, tzinfo=timezone.utc),
-    schedule=None,
+    schedule=CronTriggerTimetable(
+    "0 6 5 * *",
+    timezone="UTC",),
     catchup=False,
     is_paused_upon_creation=True,
     max_active_runs=1,
@@ -26,15 +29,17 @@ logger = logging.getLogger(__name__)
     },
     params={
         "year": Param(
-            type="integer",
+            default=None,
+            type=["null","integer"],
             minimum=2009,
-            description="Year to ingest",
+            description="Optional year override; provide together with month",
         ),
         "month": Param(
-            type="integer",
+            default=None,
+            type=["null","integer"],
             minimum=1,
             maximum=12,
-            description="Month to ingest",
+            description="Optional month override; provide together with year",
         ),
     },
     tags=["nyc", "taxi", "weather", "s3"],
@@ -43,33 +48,49 @@ logger = logging.getLogger(__name__)
 def nyc_taxi_weather_ingestion_dag():
     @task
     def prepare_period() -> dict:
-       params = get_current_context()["params"]
-       year = params["year"]
-       month = params["month"]
-       run_date = get_current_context()["dag_run"].start_date
+        context = get_current_context()
+        params = context["params"]
+        dag_run = context["dag_run"]
+        year = params.get("year")
+        month = params.get("month")
+        if (year is None) != (month is None):
+           raise ValueError("Provide both year and month, or leave both empty")
+        run_start = dag_run.start_date
+        if run_start is None:
+            raise ValueError("DAG run has no start_date")
+        run_start = run_start.astimezone(timezone.utc)
 
-       if run_date is None:
-              raise ValueError("DAG run has no queued_at")
-       run_date = run_date.astimezone(timezone.utc)
-       latest_month_index = run_date.year*12 + run_date.month - 1 - 2
-       latest_year,latest_month_zero_based = divmod(latest_month_index,12)
-       latest_month = latest_month_zero_based + 1
-       if (year,month) > (latest_year,latest_month):
-              raise ValueError(
-               "A two-calendar-month lag is required. "
-               f"Latest allowed data month: "
-               f"{latest_year}-{latest_month:02d}. "
-               f"Requested: {year}-{month:02d}."
-           )
-       last_day = monthrange(year,month)[1]
-       period = {
-              "year": year,
-              "month": month,
-              "start_date":date(year,month,1).isoformat(),
-              "end_date":date(year,month,last_day).isoformat(),
-       }
-       logger.info("Ingestion period: %s; latest allowed month: %s-%02d",period,latest_year,latest_month)
-       return period
+        if dag_run.run_type == "scheduled":
+            reference_date = context.get("data_interval_end")
+            if reference_date is None:
+                raise ValueError("Scheduled DAG has no data_interval_end")
+            reference_date = reference_date.astimezone(timezone.utc)
+        else:
+            reference_date = run_start
+        target_month_index = (reference_date.year*12 + reference_date.month - 2 - 1)
+        auto_year,auto_month_zero_based = divmod(target_month_index,12)
+        auto_month = auto_month_zero_based + 1
+        if year is None:
+            year = auto_year
+            month = auto_month
+            selection = "automatic"
+        else:
+            selection = "manual override"
+        latest_month_index = (run_start.year*12 + run_start.month - 2 - 1)
+        latest_year,latest_month_zero_based = divmod(latest_month_index,12)
+        latest_month = latest_month_zero_based + 1
+        if (year,month) > (latest_year,latest_month):
+            raise ValueError( f"A two-calendar-month lag is required. Latest allowed data month: {latest_year}-{latest_month:02d}. Requested: {year}-{month:02d}")
+        last_day = monthrange(year,month)[1]
+        period = {
+            "year":year,
+            "month":month,
+            "start_date":date(year,month,1).isoformat(),
+            "end_date":date(year,month,last_day).isoformat(),
+        }
+        logger.info( "Ingestion period: %s; selection: %s; "
+        "reference date: %s; latest allowed month: %s-%02d",period,selection,reference_date.isoformat(),latest_year,latest_month)
+        return period
     @task
     def ingest_taxi_to_s3(period:dict) -> dict:
         from ingestion import config
@@ -161,7 +182,7 @@ def nyc_taxi_weather_ingestion_dag():
                     start_date=start_date,
                     end_date=end_date,
                     )
-            logger.info("Donloading weather: %s to %s",start_date,end_date)
+            logger.info("Downloading weather: %s to %s",start_date,end_date)
 
             fetch_to_local_weather(
                 url=config.WEATHER_API_URL,
