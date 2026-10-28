@@ -1,17 +1,3 @@
-import {
-  to = aws_iam_role.role
-  id = "nyc-taxi-weather-ec-2"
-}
-
-import {
-  to = aws_iam_role_policy.policy
-  id = "nyc-taxi-weather-ec-2:nyc-taxi-ec2"
-}
-
-import {
-  to = aws_iam_instance_profile.profile
-  id = "nyc-taxi-weather-ec-2"
-}
 
 resource "aws_iam_role" "role" {
   name        = "nyc-taxi-weather-ec-2"

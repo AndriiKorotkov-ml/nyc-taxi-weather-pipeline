@@ -7,10 +7,6 @@ data "aws_subnet" "default_1a" {
   default_for_az    = true
 }
 
-import {
-  to = aws_security_group.airflow
-  id = "sg-0ef23fa435d82a360"
-}
 
 resource "aws_security_group" "airflow" {
   name        = "nyc-taxi-airflow-sg"

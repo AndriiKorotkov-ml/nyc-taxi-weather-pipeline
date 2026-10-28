@@ -1,7 +1,3 @@
-import {
-  to = aws_instance.airflow
-  id = "i-01cdbf585f85a4d0a"
-}
 
 resource "aws_instance" "airflow" {
   ami                    = "ami-042dc8681de073ac4"

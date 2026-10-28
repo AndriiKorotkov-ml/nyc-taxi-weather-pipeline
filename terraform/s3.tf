@@ -1,17 +1,4 @@
-import {
-  to = aws_s3_bucket.lake
-  id = "andrii-nyc-taxi-weather-lake"
-}
 
-import {
-  to = aws_s3_bucket_public_access_block.lake
-  id = "andrii-nyc-taxi-weather-lake"
-}
-
-import {
-  to = aws_s3_bucket_server_side_encryption_configuration.lake
-  id = "andrii-nyc-taxi-weather-lake"
-}
 resource "aws_s3_bucket" "lake" {
   bucket = "andrii-nyc-taxi-weather-lake"
 
