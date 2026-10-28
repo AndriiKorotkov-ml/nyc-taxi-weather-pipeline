@@ -43,6 +43,7 @@ flowchart TD
 - Validate data before and after transformation.
 - Support repeatable processing of an already loaded month.
 - Automate dashboard refresh after successful data processing.
+- Manage the AWS infrastructure as code.
 
 ## Technology Stack
 
@@ -57,6 +58,7 @@ flowchart TD
 | Data platform | Databricks and Delta Lake |
 | Transformations | dbt Core with the Databricks adapter |
 | Analytics | Databricks AI/BI dashboards |
+| Infrastructure as Code | Terraform, S3 remote state |
 | Local dependency management | uv |
 | Version control | Git |
 
@@ -130,6 +132,15 @@ Weather observations represent the configured NYC location, not separate measure
 │   │       └── marts/
 │   ├── seeds/
 │   └── tests/
+├── terraform/
+│   ├── backend.tf
+│   ├── providers.tf
+│   ├── variables.tf
+│   ├── s3.tf
+│   ├── iam.tf
+│   ├── network.tf
+│   ├── ec2.tf
+│   └── outputs.tf
 ├── docs/
 │   └── data_problems.txt
 ├── pyproject.toml
@@ -487,6 +498,67 @@ PostgreSQL stores Airflow metadata in a named Docker volume.
 
 This supports metadata persistence across container restarts, but it is not a backup strategy and does not protect against loss of the underlying EC2 storage.
 
+## Infrastructure as Code
+
+The AWS infrastructure is managed with Terraform in `terraform/`.
+
+The resources were originally created in the AWS console and later brought under Terraform with `import` blocks, without recreating them. After the import, `terraform plan` reports no changes.
+
+### Managed Resources
+
+| File | Resources |
+|---|---|
+| `s3.tf` | Raw data bucket, public access block (all public access blocked), SSE-S3 encryption |
+| `iam.tf` | EC2 role with a trust policy for `ec2.amazonaws.com`, inline least-privilege S3 policy, instance profile |
+| `network.tf` | Security group allowing SSH only from a single IP; default VPC and subnet read as data sources |
+| `ec2.tf` | Airflow EC2 instance with IMDSv2 required and an encrypted gp3 root volume |
+
+Design notes:
+
+- The IAM policy allows `s3:ListBucket` only on the two ingestion prefixes and `GetObject` / `PutObject` / `AbortMultipartUpload` only on objects under them. The instance cannot delete objects.
+- Bucket and object ARNs in the policy reference the bucket resource instead of hardcoded strings.
+- The instance metadata hop limit is `2`, so the Airflow containers can obtain the role credentials through IMDSv2.
+- The EC2 instance has `prevent_destroy` enabled to guard against accidental replacement.
+- The AMI ID is pinned. A `most_recent` AMI lookup would replace the instance whenever a newer image is published.
+
+### Remote State
+
+State is stored in a separate S3 bucket, `andrii-nyc-taxi-weather-tfstate`, with versioning enabled, all public access blocked, and encryption at rest. Locking uses the S3 backend's native lock file (`use_lockfile = true`, Terraform 1.10+), so no DynamoDB table is needed.
+
+The state bucket is created outside this configuration, because Terraform needs it before it can store any state.
+
+### Usage
+
+Requirements: Terraform 1.10 or later and AWS credentials with access to the account.
+
+Create `terraform/terraform.tfvars` (ignored by Git):
+
+```hcl
+my_ip = "203.0.113.10/32"
+```
+
+Then, from `terraform/`:
+
+```bash
+terraform init
+terraform plan
+terraform apply
+```
+
+Show outputs such as the bucket name, role ARN, and the instance's current public IP:
+
+```bash
+terraform output
+```
+
+The instance has no Elastic IP, so its public IP changes after a stop/start:
+
+```bash
+ssh -i <path-to-key>.pem ubuntu@$(terraform output -raw ec2_public_ip)
+```
+
+The Databricks storage-credential role that reads the bucket is managed by Databricks and is not part of this configuration.
+
 ## dbt Development
 
 The dbt project is located in:
@@ -548,7 +620,8 @@ These checks cover the tested environment and periods, not every possible failur
 - Secrets are supplied through local configuration, not committed to Git.
 - EC2 accesses AWS through an IAM role.
 - Airflow is accessed through an SSH tunnel.
-- AWS resources were provisioned manually.
+- AWS resources are managed with Terraform; state is stored remotely in S3 and is never committed.
+- The S3 bucket blocks all public access and encrypts data at rest.
 - The Docker Compose deployment is a single-host portfolio environment, not a highly available production platform.
 - Private keys, tokens, `.env` files, and local datasets must remain outside version control.
 
@@ -558,14 +631,15 @@ These checks cover the tested environment and periods, not every possible failur
 - Weather comparisons describe associations, not causal effects.
 - Dashboard interpretation depends on model filters, metric definitions, and date coverage.
 - The environment does not provide high availability.
-- Infrastructure provisioning is not currently managed by Terraform.
+- Terraform manages the infrastructure, but not the application deployment on EC2 (Docker, Airflow configuration).
 - The monetary validation warning requires further investigation.
 - Deployment to another account requires environment-specific AWS and Databricks configuration.
 
 ## Future Improvements
 
-- Manage AWS infrastructure with Terraform.
-- Automate environment provisioning and application deployment.
+- Automate application deployment on EC2 (for example, with `user_data` or Ansible).
+- Run `terraform fmt -check` and `terraform validate` in CI.
+- Add an Elastic IP or SSM Session Manager to avoid a changing public IP for SSH.
 - Add alerting and an explicit metadata backup strategy.
 - Expand weather and zone-focused dashboard pages.
 - Add automated CI checks for the Python and dbt projects.
