@@ -1,5 +1,7 @@
 # NYC Taxi & Weather Analytics Pipeline
 
+![CI](https://github.com/AndriiKorotkov-ml/nyc-taxi-weather-pipeline/actions/workflows/ci.yml/badge.svg)
+
 An end-to-end batch data engineering project combining NYC yellow taxi trips with hourly weather data.
 
 The pipeline downloads and validates monthly source data, stores raw files in Amazon S3, loads Bronze tables in Databricks, transforms data with dbt, and refreshes a Databricks AI/BI dashboard.
