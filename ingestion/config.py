@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TAXI_URL_TEMPLATE = (
-    "https://d37ci6vzurychx.cloudfront.net/trip-data/"
-    "yellow_tripdata_{year}-{month:02d}.parquet"
+    "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{year}-{month:02d}.parquet"
 )
 
 WEATHER_API_URL = "https://archive-api.open-meteo.com/v1/archive"
@@ -21,13 +20,16 @@ WEATHER_HOURLY_VARIABLES = (
     "weather_code",
 )
 DATA_DIR = Path(os.getenv("DATA_DIR", "data"))
-YELLOW_TAXI_LOCAL_PATH_TEMPLATE = DATA_DIR / "raw/taxi/yellow" / "yellow_tripdata_{year}-{month:02d}.parquet"
+YELLOW_TAXI_LOCAL_PATH_TEMPLATE = (
+    DATA_DIR / "raw/taxi/yellow" / "yellow_tripdata_{year}-{month:02d}.parquet"
+)
 WEATHER_LOCAL_PATH = DATA_DIR / "raw/weather/nyc"
-YELLOW_TAXI_S3_FILE_PATH_TEMPLATE = ("bronze/taxi/yellow/year={year}/month={month:02d}/yellow_tripdata_{year}-{month:02d}.parquet")
+YELLOW_TAXI_S3_FILE_PATH_TEMPLATE = (
+    "bronze/taxi/yellow/year={year}/month={month:02d}/yellow_tripdata_{year}-{month:02d}.parquet"
+)
 WEATHER_S3_FILE_PATH_TEMPLATE = (
-    "bronze/weather/location=nyc/"
-    "start_date={start_date}/end_date={end_date}/"
-    "response.json")
+    "bronze/weather/location=nyc/start_date={start_date}/end_date={end_date}/response.json"
+)
 
 S3_BUCKET = os.getenv("S3_BUCKET")
 if not S3_BUCKET:

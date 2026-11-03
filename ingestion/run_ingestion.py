@@ -42,9 +42,7 @@ def main(
     print(f"Starting ingestion: {year}-{month:02d} ({start_date} -> {end_date})")
 
     taxi_url = build_taxi_url(url=config.TAXI_URL_TEMPLATE, year=year, month=month)
-    taxi_path = build_dest_url(
-        path=config.YELLOW_TAXI_LOCAL_PATH_TEMPLATE, year=year, month=month
-    )
+    taxi_path = build_dest_url(path=config.YELLOW_TAXI_LOCAL_PATH_TEMPLATE, year=year, month=month)
     print(f"Downloading taxi: {taxi_url}")
     download_taxi_month(url=taxi_url, dest_path=taxi_path)
     rows = validate_taxi_file(Path(taxi_path), config.REQUIRED_TAXI_COLUMNS)
