@@ -8,7 +8,7 @@ def validate_json_weather_file(
     file_path: Path, required_variables: tuple[str, ...], start_date: str, end_date: str
 ) -> int:
     if not file_path.is_file():
-        raise FileNotFoundError(f"Wheather file was not found: {file_path}")
+        raise FileNotFoundError(f"Weather file was not found: {file_path}")
     if file_path.stat().st_size == 0:
         raise ValueError(f"File is empty: {file_path}")
     with open(file_path, encoding="utf-8") as f:
@@ -18,10 +18,10 @@ def validate_json_weather_file(
         raise ValueError(f"API error: {payload.get('reason')}")
     hourly = payload.get("hourly")
     if not isinstance(hourly, dict):
-        raise ValueError(" Weather file has no 'hourly' block ")  # noqa: TRY004
+        raise ValueError("Weather file has no 'hourly' block")  # noqa: TRY004
     required_vars = {"time", *required_variables}
     missing = []
-    for vars in required_variables:
+    for vars in required_vars:
         if vars not in hourly:
             missing.append(vars)
     if missing:
